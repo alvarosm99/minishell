@@ -6,7 +6,7 @@
 /*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:42:01 by ulfernan          #+#    #+#             */
-/*   Updated: 2025/07/21 10:20:47 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/29 16:29:43 by ulfernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,19 @@ int	find_closing_quote(t_gen_data *data, int index)
 {
 	char	quote;
 
-	quote = data->input[index];
-	index++;
-	while (data->input[index])
+	if (data->input[index])
 	{
-		if (data->input[index] == quote)
-			return (index);
+		quote = data->input[index];
 		index++;
+		while (data->input[index])
+		{
+			if (data->input[index] == quote)
+				return (index);
+			index++;
+		}
 	}
+	data->exec_count = -1;
+	data->exit_loop = 1;
 	return (-1);
 }
 

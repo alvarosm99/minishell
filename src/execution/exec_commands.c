@@ -6,13 +6,13 @@
 /*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/24 17:20:15 by ulfernan          #+#    #+#             */
-/*   Updated: 2025/07/28 12:10:56 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/29 08:14:29 by ulfernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	execute_command(t_command *command, t_gen_data *data, char **env) // pipes -> no fork; no pipes + env -> fork; no pipes + built -> no fork
+int	execute_command(t_command *command, t_gen_data *data, char **env)
 {
 	int		status;
 	char	*builtin;
@@ -30,7 +30,7 @@ int	execute_command(t_command *command, t_gen_data *data, char **env) // pipes -
 			status = builtin_handler(command->argv[0], command, data, env);
 		else
 			status = execve_handler(command, env);
-		return (status); // this is the error/success return of the builtin
+		return (status);
 	}
 	if (builtin)
 		status = execute_builtin(command->argv[0], command, data, env);

@@ -6,87 +6,26 @@
 /*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 12:42:19 by ulfernan          #+#    #+#             */
-/*   Updated: 2025/07/27 17:31:46 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/29 17:10:03 by ulfernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	heredoc(t_redirector *redirector, t_gen_data *data)
+int	redir_handler(t_command *command, t_gen_data *data, int i)
 {
-	char	*full_path;
-	char	*file_index;
-	int		fd;
+	int	status;
 
-	heredoc_count(data);
-	file_index = ft_itoa(data->heredoc_count - 1);
-	full_path = ft_strjoin("./tmp/heredoc_tmp_", file_index);
-	fd = open(full_path, O_RDONLY);
-	if (fd == -1)
-	{
-		ft_putstr_fd("-minishell: ", 2);
-		ft_putstr_fd(redirector->target_file, 2);
-		ft_putendl_fd(": no such file or directory", 2);
-		free(file_index);
-		free(full_path);
-		return (1);
-	}
-	dup2(fd, 0);
-	close(fd);
-	free(file_index);
-	free(full_path);
-	return (0);
-}
-
-int	append(t_redirector *redirector)
-{
-	int		fd;
-
-	fd = open(redirector->target_file, O_WRONLY | O_CREAT | O_APPEND, 0644);
-	if (fd == -1)
-	{
-		ft_putstr_fd("-minishell: ", 2);
-		ft_putstr_fd(redirector->target_file, 2);
-		ft_putendl_fd(": no such file or directory", 2);
-		return (1);
-	}
-	dup2(fd, 1);
-	close(fd);
-	return (0);
-}
-
-int	to_output(t_redirector *redirector)
-{
-	int	fd;
-
-	fd = open(redirector->target_file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
-	if (fd == -1)
-	{
-		ft_putstr_fd("-minishell: ", 2);
-		ft_putstr_fd(redirector->target_file, 2);
-		ft_putendl_fd("no such file or directory", 2);
-		return (1);
-	}
-	dup2(fd, 1);
-	close(fd);
-	return (0);
-}
-
-int	from_input(t_redirector *redirector)
-{
-	int	fd;
-
-	fd = open(redirector->target_file, O_RDONLY);
-	if (fd == -1)
-	{
-		ft_putstr_fd("-minishell: ", 2);
-		ft_putstr_fd(redirector->target_file, 2);
-		ft_putendl_fd(": no such file or directory", 2);
-		return (1);
-	}
-	dup2(fd, 0);
-	close(fd);
-	return (0);
+	status = 0;
+	if (command->redirections[i]->type == INPUT)
+		status = from_input(command->redirections[i]);
+	else if (command->redirections[i]->type == OUTPUT)
+		status = to_output(command->redirections[i]);
+	else if (command->redirections[i]->type == APPEND)
+		status = append(command->redirections[i]);
+	else if (command->redirections[i]->type == HEREDOC)
+		status = heredoc(command->redirections[i], data);
+	return (status);
 }
 
 int	redirect_setup(t_command *command, t_gen_data *data)
@@ -94,19 +33,78 @@ int	redirect_setup(t_command *command, t_gen_data *data)
 	int	status;
 	int	i;
 
-	status = 0;
 	i = 0;
+	status = 0;
 	while (command->redirections[i])
 	{
-		if (command->redirections[i]->type == INPUT)
-			status = from_input(command->redirections[i]);
-		else if (command->redirections[i]->type == OUTPUT)
-			status = to_output(command->redirections[i]);
-		else if (command->redirections[i]->type == APPEND)
-			status = append(command->redirections[i]);
-		else if (command->redirections[i]->type == HEREDOC)
-			status = heredoc(command->redirections[i], data);
+		status = redir_handler(command, data, i);
+		if (status != 0)
+			return (status);
 		i++;
 	}
 	return (status);
+}
+
+void	assign_redir_type(
+			t_gen_data *data, t_redirector **redirections, int i_start, int i)
+{
+	if (!redirections[i])
+		fatal_error(data, "malloc");
+	if (!ft_strcmp(data->executables[i_start]->text, "<"))
+		redirections[i]->type = INPUT;
+	else if (!ft_strcmp(data->executables[i_start]->text, "<<"))
+		redirections[i]->type = HEREDOC;
+	else if (!ft_strcmp(data->executables[i_start]->text, ">"))
+		redirections[i]->type = OUTPUT;
+	else if (!ft_strcmp(data->executables[i_start]->text, ">>"))
+		redirections[i]->type = APPEND;
+}
+
+void	redir_fill(t_gen_data *data, t_redirector **redirections, int i_start)
+{
+	int		i;
+	char	*target;
+
+	i = 0;
+	while (data->executables[i_start]
+		&& data->executables[i_start]->type != PIPE)
+	{
+		if (data->executables[i_start]->type == REDIRECTOR)
+		{
+			target = data->executables[i_start + 1]->text;
+			redirections[i] = malloc(sizeof(t_redirector));
+			assign_redir_type(data, redirections, i_start, i);
+			redirections[i]->target_file = ft_strdup(target);
+			if (!redirections[i]->target_file)
+				fatal_error(data, "malloc");
+			i++;
+		}
+		i_start++;
+	}
+}
+
+void	redir_assign(t_command *command, t_gen_data *data, int index)
+{
+	t_redirector	**redirections;
+	int				size;
+	int				i_start;
+
+	size = 0;
+	while (index > 0 && data->executables[index]->type != PIPE)
+		index--;
+	if (index > 0 && data->executables[index]->type == PIPE)
+		index++;
+	i_start = index;
+	while (data->executables[index] && data->executables[index]->type != PIPE)
+	{
+		if (data->executables[index]->type == REDIRECTOR)
+			size++;
+		index++;
+	}
+	redirections = malloc(sizeof(t_redirector *) * (size + 1));
+	if (!redirections)
+		fatal_error(data, "malloc");
+	redirections[size] = NULL;
+	redir_fill(data, redirections, i_start);
+	command->redirections = redirections;
 }

@@ -18,6 +18,8 @@ char	*find_exec(char **all_dir, char *cmd)
 	char	*path;
 	char	*exec;
 
+	if (!all_dir || !*all_dir)
+		return (NULL);
 	i = 0;
 	while (all_dir[i])
 	{

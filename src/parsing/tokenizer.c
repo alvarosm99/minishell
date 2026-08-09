@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tokenizer.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: ulfernan <ulfernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/13 08:39:09 by ulfernan          #+#    #+#             */
-/*   Updated: 2025/07/27 16:18:12 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/31 00:28:35 by ulfernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ void	generic_token(t_gen_data *data, t_token *token, int *index)
 
 	symbol = " \t\n<>|'\"";
 	start_i = *index;
-	while (data->input[*index] && ft_strchr(symbol, data->input[*index]) == NULL)
+	while (data->input[*index]
+		&& ft_strchr(symbol, data->input[*index]) == NULL)
 	{
 		if (data->input[*index] == '$')
 			token->expand = 1;
@@ -33,6 +34,10 @@ void	generic_token(t_gen_data *data, t_token *token, int *index)
 	while (start_i < *index)
 		token->text[i++] = data->input[start_i++];
 	token->text[i] = '\0';
+	symbol = " \t\n<>|";
+	if (data->input[*index]
+		&& ft_strchr(symbol, data->input[*index]) == NULL)
+		token->merge = 1;
 }
 
 void	redirector_token(t_gen_data *data, t_token *token, int *index)
@@ -81,21 +86,30 @@ void	quoted_token(t_gen_data *data, t_token *token, int *index)
 	i = 0;
 	while (start_i < *index)
 	{
-		token->text[i++] = data->input[start_i++];
-		if (data->input[*index] == '$' && token->quote == DOUBLE)
+		if (data->input[start_i] == '$' && token->quote == DOUBLE)
 			token->expand = 1;
+		token->text[i++] = data->input[start_i++];
 	}
 	(*index)++;
 }
 
 t_token	*fill_token(t_gen_data *data, int *index, t_token *token)
 {
+	char	*symbol;
+
+	symbol = " \t\n<>|";
 	token->type = WORD;
 	token->expand = 0;
 	token->quote = NONE;
+	token->merge = 0;
 	*index = skip_space_tab_nl(data, *index);
 	if (data->input[*index] == '\'' || data->input[*index] == '"')
+	{
 		quoted_token(data, token, index);
+		if (data->input[*index]
+			&& ft_strchr(symbol, data->input[*index]) == NULL)
+			token->merge = 1;
+	}
 	else if (data->input[*index] == '<' || data->input[*index] == '>'
 		|| data->input[*index] == '|')
 		redirector_token(data, token, index);
@@ -108,7 +122,7 @@ t_token	*exec_split(t_gen_data *data)
 {
 	int			i;
 	t_token		*token;
-	
+
 	token = malloc(sizeof(t_token));
 	if (!token)
 		fatal_error(data, "malloc");

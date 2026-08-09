@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipeline_stream.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: ulfernan <ulfernan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/25 13:25:27 by ulfernan          #+#    #+#             */
-/*   Updated: 2025/07/28 13:04:34 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/31 01:23:58 by ulfernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,20 @@ void	main_parent(t_gen_data *data, pid_t *pid)
 
 	i = 0;
 	g_signal_status = 1;
+	signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
 	while (i < data->pipe_count * 2)
 		close(data->pipe_ends[i++]);
 	i = 0;
 	while (i <= data->pipe_count)
 		waitpid(pid[i++], &data->last_exit_status, 0);
+	if (WIFSIGNALED(data->last_exit_status))
+	{
+		data->last_exit_status = 128 + WTERMSIG(data->last_exit_status);
+		write(1, "\n", 1);
+	}
+	signal(SIGINT, signal_handler);
+	signal(SIGQUIT, SIG_IGN);
 }
 
 void	manage_fds(t_gen_data *data, int index)
@@ -57,6 +66,7 @@ void	fork_commands(
 		else if (!pid[i])
 		{
 			signal(SIGINT, SIG_DFL);
+			signal(SIGQUIT, SIG_DFL);
 			manage_fds(data, i);
 			data->last_exit_status = redirect_setup(commands[i], data);
 			{

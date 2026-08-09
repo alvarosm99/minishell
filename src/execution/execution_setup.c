@@ -12,7 +12,6 @@
 
 #include "../minishell.h"
 
-
 t_command	**command_pipeline(t_gen_data *data)
 {
 	t_command	**command_array;
@@ -49,7 +48,7 @@ void	pipe_count(t_gen_data *data)
 void	redir_parse(t_gen_data *data, int *index)
 {
 	if (*index > 0 && (data->executables[*index - 1]->type == REDIRECTOR
-		|| data->executables[*index - 1]->type == PIPE))
+			|| data->executables[*index - 1]->type == PIPE))
 	{
 		syntax_error(data->executables[*index]->text, data, 1);
 		return ;
@@ -78,19 +77,21 @@ void	cmd_parse(t_gen_data *data)
 	int	i;
 
 	i = 0;
-	while (data->executables[i])
+	while (data->executables[i] && data->exit_loop != 1)
 	{
 		if (data->executables[i]->type == REDIRECTOR)
 			redir_parse(data, &i);
+		else if (i > 0 && data->executables[i - 1]->type == TARGET)
+		{
+			data->executables[i++]->type = ARG;
+			while (data->executables[i]
+				&& data->executables[i]->type == WORD)
+				data->executables[i++]->type = ARG;
+		}
 		else if (data->executables[i]->type == WORD)
 		{
-			if (i > 0 && data->executables[i - 1]->type == TARGET)
-			{
-				syntax_error(data->executables[i]->text, data, 2);
-				return ;
-			}
 			data->executables[i++]->type = COMMAND;
-			while (data->executables[i] 
+			while (data->executables[i]
 				&& data->executables[i]->type == WORD)
 				data->executables[i++]->type = ARG;
 		}

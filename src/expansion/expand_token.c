@@ -69,12 +69,14 @@ void	heredoc_handler(t_gen_data *data, char **env)
 		signal(SIGINT, SIG_IGN);
 		waitpid(pid, &g_signal_status, 0);
 		if (WIFSIGNALED(g_signal_status))
+		{
 			data->last_exit_status = 128 + WTERMSIG(g_signal_status);
+			write(1, "\n", 1);
+		}
 		else
 			data->last_exit_status = WEXITSTATUS(g_signal_status);
 		if (data->last_exit_status == 1)
 			data->exit_loop = 1;
-		signal(SIGINT, signal_handler);
 	}
 }
 
@@ -87,6 +89,7 @@ void	expand_token(t_gen_data *data, char **env)
 		return ;
 	i = 0;
 	heredoc_handler(data, env);
+	signal(SIGINT, signal_handler);
 	while (data->executables[i])
 	{
 		if (data->executables[i]->expand == 1
@@ -95,7 +98,7 @@ void	expand_token(t_gen_data *data, char **env)
 		{
 			tmp = data->executables[i]->text;
 			data->executables[i]->text = expansion_setup(
-				data, data->executables[i]->text, env);
+					data, data->executables[i]->text, env);
 			free(tmp);
 		}
 		i++;

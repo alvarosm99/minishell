@@ -6,7 +6,7 @@
 /*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/12 08:47:54 by ulfernan          #+#    #+#             */
-/*   Updated: 2025/07/27 17:56:35 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/29 14:16:46 by ulfernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,43 @@ void	load_export(t_gen_data *data, char **env)
 	}
 }
 
+char	*get_shlvl(t_gen_data *data)
+{
+	char	*shlvl_str;
+	char	*entry;
+	int		shlvl;
+
+	shlvl_str = getenv("SHLVL");
+	if (!shlvl_str || shlvl_str[0] == '0')
+		return (NULL);
+	shlvl = ft_atoi(shlvl_str);
+	shlvl++;
+	shlvl_str = ft_itoa(shlvl);
+	if (!shlvl_str)
+		fatal_error(data, "malloc");
+	entry = ft_strjoin("SHLVL=", shlvl_str);
+	if (!entry)
+		fatal_error(data, "malloc");
+	free(shlvl_str);
+	return (entry);
+}
+
+void	load_env_loop(t_gen_data *data, char **env, int i, char *shlvl)
+{
+	if (!ft_strncmp(env[i], "SHLVL=", 6))
+		data->exec_env[i] = ft_strdup(shlvl);
+	else
+	{
+		data->exec_env[i] = ft_strdup(env[i]);
+		if (!data->exec_env[i])
+			fatal_error(data, "malloc");
+	}
+}
+
 void	load_env(t_gen_data *data, char **env)
 {
-	int	i;
+	char	*shlvl;
+	int		i;
 
 	if (!env)
 		fatal_error(data, "env");
@@ -48,14 +82,14 @@ void	load_env(t_gen_data *data, char **env)
 	if (!data->exec_env)
 		fatal_error(data, "malloc");
 	data->exec_env[i] = NULL;
+	shlvl = get_shlvl(data);
 	i = 0;
 	while (env[i])
 	{
-		data->exec_env[i] = ft_strdup(env[i]);
-		if (!data->exec_env[i])
-			fatal_error(data, "malloc");
+		load_env_loop(data, env, i, shlvl);
 		i++;
 	}
+	free(shlvl);
 }
 
 void	load_username(t_gen_data *data)

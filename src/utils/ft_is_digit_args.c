@@ -1,44 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.c                                              :+:      :+:    :+:   */
+/*   ft_is_digit_args.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: asalguer <asalguer@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/09 18:40:05 by asalguer          #+#    #+#             */
-/*   Updated: 2025/07/30 16:01:45 by asalguer         ###   ########.fr       */
+/*   Created: 2025/07/28 20:11:10 by asalguer          #+#    #+#             */
+/*   Updated: 2025/07/28 20:20:12 by asalguer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	env(char **exec_env)
+int	ft_is_digit_args(char *args)
 {
 	int	i;
+	int	digit;
 
 	i = 0;
-	if (!exec_env)
-		return (1);
-	while (exec_env[i])
+	digit = 1;
+	while (args[i])
 	{
-		printf("%s\n", exec_env[i]);
+		if (!ft_isdigit(args[i]))
+			digit = 0;
 		i++;
 	}
-	return (0);
-}
-
-void	free_env(char **exec_env)
-{
-	int	i;
-
-	if (!exec_env)
-		return ;
-	i = 0;
-	while (exec_env[i])
-	{
-		if (exec_env[i])
-			free(exec_env[i]);
-		exec_env[i] = NULL;
-		i++;
-	}
+	return (digit);
 }

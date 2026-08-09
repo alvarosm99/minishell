@@ -1,5 +1,6 @@
 CC = cc
 CFLAGS = -Wall -Werror -Wextra
+#CFLAGS += -fPIE
 
 NAME = libft.a
 

@@ -3,29 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   exit.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: asalguer <asalguer@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 18:40:15 by asalguer          #+#    #+#             */
-/*   Updated: 2025/07/27 20:48:41 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/28 20:19:28 by asalguer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	is_digit(char *args)
+void	exit_fds(void)
 {
-	int	i;
-	int	digit;
-
-	i = 0;
-	digit = 1;
-	while (args[i])
-	{
-		if (!ft_isdigit(args[i]))
-			digit = 0;
-		i++;
-	}
-	return (digit);
+	close(0);
+	close(1);
+	close(2);
 }
 
 void	exit_handler(t_gen_data *data, int exit_status)
@@ -37,6 +28,7 @@ void	exit_handler(t_gen_data *data, int exit_status)
 	data = NULL;
 	printf("exit\n");
 	usleep(500000);
+	exit_fds();
 	exit(exit_status);
 }
 
@@ -58,7 +50,7 @@ void	exit_check(t_gen_data *data, char **args, int i)
 	first_arg = ft_atoi(args[1]);
 	if (ft_atoi(args[1]) < 0)
 		first_arg = ft_atoi(args[1]) * -1;
-	if (i >= 2 && !is_digit(args[1]))
+	if (i >= 2 && !ft_is_digit_args(args[1]))
 	{
 		ft_putstr_fd("minishell: exit: ", 2);
 		ft_putstr_fd(args[1], 2);
@@ -72,24 +64,16 @@ void	exit_check(t_gen_data *data, char **args, int i)
 		data->last_exit_status = first_arg;
 }
 
-void	exit_fds(void)
-{
-	close(0);
-	close(1);
-	close(2);
-}
-
 int	exit_minishell(t_gen_data *data, char **args)
 {
 	int	i;
 	int	exit_status;
 
 	i = 0;
-	exit_fds();
 	exit_noargs(data, args);
 	while (args[i])
 		i++;
-	if (i > 2 && is_digit(args[1]))
+	if (i > 2 && ft_is_digit_args(args[1]))
 	{
 		ft_putendl_fd("minishell: exit: too many arguments", 2);
 		data->last_exit_status = 1;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_data.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: asalguer <asalguer@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 21:03:08 by asalguer          #+#    #+#             */
-/*   Updated: 2025/07/28 12:18:54 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/30 20:42:07 by asalguer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void	reset_data(t_gen_data *data)
 	if (data->executables)
 		free_tokens(data);
 	if (data->command_array)
-		free_commands(data->command_array);
+		free_commands(&data->command_array);
 	data->command_array = NULL;
 	if (data->pipe_ends != NULL)
 		free(data->pipe_ends);
@@ -35,7 +35,9 @@ void	reset_data(t_gen_data *data)
 	data->env_size = 0;
 	data->heredoc_count = 0;
 	data->redir_count = 0;
+	data->exp_token_size = 0;
 	data->prev_exit_status = data->last_exit_status;
+	data->exit_loop = 0;
 }
 
 void	init_data(t_gen_data *data, char **env)
@@ -57,6 +59,7 @@ void	init_data(t_gen_data *data, char **env)
 	data->prev_exit_status = 0;
 	data->command_array = NULL;
 	data->redir_count = 0;
+	data->exp_token_size = 0;
 	load_env(data, env);
 	load_export(data, env);
 }

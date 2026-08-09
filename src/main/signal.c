@@ -28,7 +28,7 @@ void	reset_prompt(void)
 
 void	signal_handler(int signum)
 {
-	if (signum == SIGINT && isatty(0) && g_signal_status != 1)
+	if (signum == SIGINT)
 		reset_prompt();
 	else if (g_signal_status == 1)
 		exit_process();

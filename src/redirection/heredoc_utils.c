@@ -24,7 +24,8 @@ void	heredoc_count(t_gen_data *data)
 	data->heredoc_count = 0;
 	while ((entry))
 	{
-		if (ft_strncmp(entry->d_name, "heredoc_tmp_", ft_strlen("heredoc_tmp_")) == 0)
+		if (ft_strncmp(
+				entry->d_name, "heredoc_tmp_", ft_strlen("heredoc_tmp_")) == 0)
 			data->heredoc_count++;
 		entry = readdir(dir);
 	}

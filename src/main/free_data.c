@@ -6,7 +6,7 @@
 /*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/12 09:24:20 by ulfernan          #+#    #+#             */
-/*   Updated: 2025/07/28 12:21:53 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/29 14:09:02 by ulfernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,42 +35,48 @@ void	free_tokens(t_gen_data *data)
 	}
 }
 
-void	free_commands(t_command **commands)
+void	free_command_loop(t_command **commands, int i)
 {
-	int	i;
 	int	j;
 
-	i = 0;
-	while (commands[i])
+	if (commands[i]->argv)
+		ft_free_tab(&commands[i]->argv);
+	if (commands[i]->redirections)
 	{
-		if (commands[i]->argv)
-			ft_free_tab(&commands[i]->argv);
-		if (commands[i]->redirections)
+		j = 0;
+		while (commands[i]->redirections[j])
 		{
-			j = 0;
-			while (commands[i]->redirections[j])
+			if (commands[i]->redirections[j]->target_file)
 			{
-				if (commands[i]->redirections[j]->target_file)
-				{
-					free(commands[i]->redirections[j]->target_file);
-					commands[i]->redirections[j]->target_file = NULL;
-				}
-				free(commands[i]->redirections[j]);
-				commands[i]->redirections[j] = NULL;
-				j++;
+				free(commands[i]->redirections[j]->target_file);
+				commands[i]->redirections[j]->target_file = NULL;
 			}
-			free(commands[i]->redirections);
-			commands[i]->redirections = NULL;
+			free(commands[i]->redirections[j]);
+			commands[i]->redirections[j] = NULL;
+			j++;
 		}
-		free(commands[i]);
-		commands[i] = NULL;
-		i++;
+		free(commands[i]->redirections);
+		commands[i]->redirections = NULL;
 	}
-	free(commands);
-	commands = NULL;
 }
 
-void	free_data(t_gen_data *data)
+void	free_commands(t_command ***commands)
+{
+	int	i;
+
+	i = 0;
+	while ((*commands)[i])
+	{
+		free_command_loop(*commands, i);
+		free((*commands)[i]);
+		(*commands)[i] = NULL;
+		i++;
+	}
+	free(*commands);
+	*commands = NULL;
+}
+
+void	free_input_fp_fds(t_gen_data *data)
 {
 	if (data->input)
 	{
@@ -82,19 +88,24 @@ void	free_data(t_gen_data *data)
 		free(data->final_prompt);
 		data->final_prompt = NULL;
 	}
-	if (data->exec_env)
-		ft_free_tab(&data->exec_env);
-	if (data->exec_env_export)
-		ft_free_tab(&data->exec_env_export);
-	if (data->command_array)
-		free_commands(data->command_array);
-	if (data->pipe_ends != NULL)
-		free(data->pipe_ends);
 	if (data->tmp_fds)
 	{
 		free(data->tmp_fds);
 		data->tmp_fds = NULL;
 	}
+}
+
+void	free_data(t_gen_data *data)
+{
+	free_input_fp_fds(data);
+	if (data->exec_env)
+		ft_free_tab(&data->exec_env);
+	if (data->exec_env_export)
+		ft_free_tab(&data->exec_env_export);
+	if (data->command_array)
+		free_commands(&data->command_array);
+	if (data->pipe_ends != NULL)
+		free(data->pipe_ends);
 	if (data->executables)
 		free_tokens(data);
 	free_heredoc(data);

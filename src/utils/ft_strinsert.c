@@ -15,11 +15,15 @@
 char	*ft_strinsert(char *string, char *insert, int index, int skip)
 {
 	char	*new_string;
+	int		insert_len;
 	int		i;
 	int		j;
 	int		n;
 
-	new_string = malloc(ft_strlen(string) + ft_strlen(insert) - skip + 1);
+	if (insert[0] == '\0')
+		insert_len = 0;
+	insert_len = ft_strlen(insert);
+	new_string = malloc(ft_strlen(string) + insert_len - skip + 1);
 	if (!new_string)
 		return (NULL);
 	i = 0;

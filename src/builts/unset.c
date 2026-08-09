@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   unset.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: asalguer <asalguer@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 18:40:38 by asalguer          #+#    #+#             */
-/*   Updated: 2025/07/27 21:02:19 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/30 14:41:05 by asalguer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ char	**unset_handler(char **env, char *var)
 	}
 	new_env[i] = NULL;
 	free_env(env);
+	free(env);
 	return (new_env);
 }
 
@@ -82,7 +83,8 @@ int	unset(t_gen_data *data, char **commands)
 	while (commands[i])
 	{
 		data->exec_env = unset_handler(data->exec_env, commands[i]);
-		data->exec_env_export = unset_handler(data->exec_env_export, commands[i]);
+		data->exec_env_export = \
+		unset_handler(data->exec_env_export, commands[i]);
 		i++;
 	}
 	return (0);

@@ -6,11 +6,29 @@
 /*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 20:32:58 by ulfernan          #+#    #+#             */
-/*   Updated: 2025/07/28 10:45:29 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/29 12:31:34 by ulfernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
+
+int	exec_error(t_command *command, char **cmd_path, int errcode)
+{
+	if (errcode == 0)
+	{
+		ft_putstr_fd("couldn't find command: ", 2);
+		ft_putendl_fd(command->argv[0], 2);
+		free(*cmd_path);
+		return (127);
+	}
+	else
+	{
+		ft_putstr_fd("command found but not executable: ", 2);
+		ft_putendl_fd(command->argv[0], 2);
+		free(*cmd_path);
+		return (126);
+	}
+}
 
 void	heredoc_error(t_gen_data *data, char *delimiter)
 {
@@ -24,7 +42,8 @@ void	heredoc_error(t_gen_data *data, char *delimiter)
 void	syntax_error(char *token, t_gen_data *data, int optcode)
 {
 	if (optcode == 0)
-		ft_putendl_fd("minishell: syntax error near unexpected token \"\\n\"", 2);
+		ft_putendl_fd(
+			"minishell: syntax error near unexpected token \"\\n\"", 2);
 	else if (optcode == 1)
 	{
 		ft_putstr_fd("minishell: syntax error near unexpected token ", 2);
@@ -56,7 +75,7 @@ void	unclosed_token_error(char *token, t_gen_data *data)
 	}
 }
 
-void	fatal_error(t_gen_data *data, char *error_code) // used to immediatly terminate the program
+void	fatal_error(t_gen_data *data, char *error_code)
 {
 	if (!ft_strcmp(error_code, "malloc"))
 		ft_putendl_fd("minishell: malloc failure: couldn't allocate memory", 2);

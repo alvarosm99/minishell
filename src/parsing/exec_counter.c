@@ -16,7 +16,7 @@ int	skip_space_tab_nl_field(char *var_text, int index)
 {
 	while (var_text[index]
 		&& (var_text[index] == ' ' || var_text[index] == '\t'
-		|| var_text[index] == '\n'))
+			|| var_text[index] == '\n'))
 		index++;
 	return (index);
 }
@@ -25,7 +25,7 @@ int	skip_space_tab_nl(t_gen_data *data, int index)
 {
 	while (data->input[index]
 		&& (data->input[index] == ' ' || data->input[index] == '\t'
-		|| data->input[index] == '\n'))
+			|| data->input[index] == '\n'))
 		index++;
 	return (index);
 }
@@ -47,7 +47,7 @@ int	skip_token(t_gen_data *data, int index)
 	symbol = " \t\n<>|'\"";
 	data->exec_count++;
 	while (data->input[index] && (data->input[index] != ' '
-		&& ft_strchr(symbol, data->input[index]) == NULL))
+			&& ft_strchr(symbol, data->input[index]) == NULL))
 		index++;
 	return (index);
 }
@@ -67,11 +67,7 @@ void	exec_counter(t_gen_data *data)
 			data->exec_count++;
 			i = find_closing_quote(data, i);
 			if (i == -1)
-			{
-				data->exec_count = -1;
-				data->exit_loop = 1;
 				return ;
-			}
 			i++;
 		}
 		else if (data->input[i] == '<' || data->input[i] == '>'

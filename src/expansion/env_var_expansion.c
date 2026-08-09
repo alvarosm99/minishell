@@ -6,7 +6,7 @@
 /*   By: ulfernan <ulfernan@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/10 10:37:48 by ulfernan          #+#    #+#             */
-/*   Updated: 2025/07/27 12:30:07 by ulfernan         ###   ########.fr       */
+/*   Updated: 2025/07/29 11:42:30 by ulfernan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ char	*get_env_path(char *env_var, char **env)
 	if (!expanded_var)
 	{
 		expanded_var = malloc(1);
-		expanded_var[1] = '\0';
+		expanded_var[0] = '\0';
 		return (expanded_var);
 	}
 	return (ft_strdup(expanded_var));
@@ -31,12 +31,12 @@ char	*env_alloc(char *line, int index, t_gen_data *data)
 	char	*var;
 	int		start_i;
 	int		i;
-	
+
 	start_i = index;
 	while (line[index] && (line[index] == '_'
-		|| (line[index] >= '0' && line[index] <= '9')
-		|| (line[index] >= 'a' && line[index] <= 'z')
-		|| (line[index] >= 'A' && line[index] <= 'Z')))
+			|| (line[index] >= '0' && line[index] <= '9')
+			|| (line[index] >= 'a' && line[index] <= 'z')
+			|| (line[index] >= 'A' && line[index] <= 'Z')))
 	{
 		data->env_size++;
 		index++;
@@ -47,9 +47,9 @@ char	*env_alloc(char *line, int index, t_gen_data *data)
 	var[data->env_size] = '\0';
 	i = 0;
 	while (line[start_i] && (line[start_i] == '_'
-		|| (line[start_i] >= '0' && line[start_i] <= '9')
-		|| (line[start_i] >= 'a' && line[start_i] <= 'z')
-		|| (line[start_i] >= 'A' && line[start_i] <= 'Z')))
+			|| (line[start_i] >= '0' && line[start_i] <= '9')
+			|| (line[start_i] >= 'a' && line[start_i] <= 'z')
+			|| (line[start_i] >= 'A' && line[start_i] <= 'Z')))
 		var[i++] = line[start_i++];
 	return (var);
 }
@@ -94,7 +94,7 @@ char	*exit_var(t_gen_data *data)
 	var = ft_itoa(exit_status);
 	if (!var)
 		fatal_error(data, "malloc");
-	data->env_size = ft_strlen(var);
+	data->env_size = 1;
 	return (var);
 }
 

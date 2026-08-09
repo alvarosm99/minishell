@@ -17,14 +17,26 @@
 
 int	n_check(t_command *command, int *i)
 {
-	int	flag;
+	char	*n;
+	int		flag;
+	int		j;
 
 	flag = 0;
-	while (!ft_strcmp(command->argv[*i], "-n"))
+	n = command->argv[*i];
+	j = 0;
+	if (n[j] != '-')
+		return (flag);
+	j++;
+	if (!n[j])
+		return (flag);
+	while (n[j])
 	{
-		flag = 1;
-		(*i)++;
+		if (n[j] != 'n')
+			return (flag);
+		j++;
 	}
+	flag = 1;
+	(*i)++;
 	return (flag);
 }
 
